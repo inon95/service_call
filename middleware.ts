@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 const AGENT_HUB_API_URL = process.env.AGENT_HUB_API_URL || 'https://agent-hub-api.services.silverbullet.cloud';
@@ -9,7 +9,6 @@ export async function middleware(request: NextRequest) {
   const agentId = '68e1af59dd4ab3bce91a07dc'; // integration-expert
 
   // Map routes to workspace paths
-  // Note: /vapi root is reserved for the config page at app/vapi/page.tsx
   const routeMap: Record<string, string> = {
     '/vapi/app': '/vapi-integration-app/index.mdx',
     '/vapi/app/tests': '/vapi-integration-app/tests.mdx',
@@ -18,7 +17,8 @@ export async function middleware(request: NextRequest) {
   };
 
   const workspacePath = routeMap[pathname];
-
+  
+  // Handle VAPI workspace routes first
   if (workspacePath) {
     try {
       // For MDX files, render them through Agent Hub UI iframe
@@ -54,7 +54,6 @@ export async function middleware(request: NextRequest) {
   ></iframe>
 </body>
 </html>`;
-
         return new NextResponse(iframeHtml, {
           headers: {
             'Content-Type': 'text/html',
@@ -62,7 +61,7 @@ export async function middleware(request: NextRequest) {
           },
         });
       }
-
+      
       // For HTML files, serve content directly
       const response = await fetch(`${AGENT_HUB_API_URL}/api/workspace/get?path=${encodeURIComponent(workspacePath)}&scope=agent&agentId=${agentId}`, {
         headers: {
@@ -71,7 +70,7 @@ export async function middleware(request: NextRequest) {
           'x-agent-id': agentId
         }
       });
-
+      
       if (response.ok) {
         const data = await response.json();
         return new NextResponse(data.content, {
@@ -86,9 +85,30 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Restaurant redirect logic - allow only specific paths
+  const allowedPaths = [
+    '/restaurant',
+    '/shop',
+    '/api',
+    '/_next',
+    '/favicon.ico',
+    '/vapi',
+  ];
+
+  const isAllowed = allowedPaths.some(path => 
+    pathname === path || pathname.startsWith(path + '/')
+  );
+
+  // Redirect all non-allowed paths to restaurant
+  if (!isAllowed) {
+    return NextResponse.redirect(new URL('/restaurant', request.url));
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/vapi', '/vapi/:path*'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico).*)',
+  ],
 };
