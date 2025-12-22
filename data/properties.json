@@ -1,0 +1,151 @@
+{
+  "hotelServices": [
+    "Transfers and Private Transport",
+    "World-Class Dining & On-Site Sommelier",
+    "Onsen in Every Unit",
+    "Laundry and Cleaning",
+    "Massage & Wellness Treatments",
+    "On-Site Parking",
+    "Concierge Service"
+  ],
+  "properties": [
+    {
+      "id": "hirafu-penthouse",
+      "name": "Hirafu Penthouse",
+      "type": "The Ultimate Mountain Residence",
+      "location": "Top Floor, East Wing",
+      "image": "/hotel3.jpg",
+      "bedrooms": 4,
+      "bathrooms": 3,
+      "maxGuests": 8,
+      "sqm": 280,
+      "amenities": ["Private Onsen", "Mt. Yotei Panorama", "Direct Elevator Access", "Floor-to-Ceiling Windows", "Heated Floors", "Butler Service", "Private Balcony"],
+      "status": "occupied",
+      "guest": {
+        "id": "tanaka-family",
+        "name": "Tanaka Family",
+        "checkIn": "Dec 10",
+        "checkOut": "Dec 15",
+        "guestCount": 4,
+        "status": "vip"
+      },
+      "staffId": "yuki",
+      "description": "The crown jewel of The 1898 Niseko, featuring unobstructed views of Mt. Yotei and the surrounding mountains."
+    },
+    {
+      "id": "hanazono-penthouse",
+      "name": "Hanazono Penthouse",
+      "type": "Panoramic Mountain Luxury",
+      "location": "Top Floor, West Wing",
+      "image": "/hotel3.jpg",
+      "bedrooms": 3,
+      "bathrooms": 2,
+      "maxGuests": 6,
+      "sqm": 220,
+      "amenities": ["Private Onsen", "Panoramic Views", "Direct Elevator Access", "Floor-to-Ceiling Windows", "Heated Floors", "Ski Storage", "Private Balcony"],
+      "status": "occupied",
+      "guest": {
+        "id": "avi-osipov",
+        "name": "Avi Osipov",
+        "checkIn": "Dec 20",
+        "checkOut": "Dec 24",
+        "guestCount": 1,
+        "status": "vip"
+      },
+      "staffId": "mika",
+      "description": "Stunning penthouse with wraparound views of Hanazono ski area and the Niseko mountain range."
+    },
+    {
+      "id": "annupuri-duplex",
+      "name": "Annupuri Duplex",
+      "type": "Elevated Living",
+      "location": "Floor 3-4, North Wing",
+      "image": "/hotel3.jpg",
+      "bedrooms": 3,
+      "bathrooms": 2,
+      "maxGuests": 6,
+      "sqm": 180,
+      "amenities": ["Private Onsen", "Annupuri Views", "Two-Level Living", "Floor-to-Ceiling Windows", "Heated Floors", "Kids Play Area", "Connecting Rooms"],
+      "status": "occupied",
+      "guest": {
+        "id": "kim-family",
+        "name": "Kim Family",
+        "checkIn": "Dec 9",
+        "checkOut": "Dec 11",
+        "guestCount": 4,
+        "status": "standard"
+      },
+      "staffId": "yuki",
+      "description": "A sophisticated two-level suite perfect for families, with stunning views of Mt. Annupuri."
+    },
+    {
+      "id": "village-duplex",
+      "name": "Village Duplex",
+      "type": "Contemporary Mountain Elegance",
+      "location": "Floor 2-3, South Wing",
+      "image": "/hotel3.jpg",
+      "bedrooms": 2,
+      "bathrooms": 2,
+      "maxGuests": 4,
+      "sqm": 150,
+      "amenities": ["Private Onsen", "Village Views", "Two-Level Living", "Floor-to-Ceiling Windows", "Heated Floors", "Fireplace", "Tatami Lounge"],
+      "status": "occupied",
+      "guest": {
+        "id": "sato-couple",
+        "name": "Sato Couple",
+        "checkIn": "Dec 8",
+        "checkOut": "Dec 12",
+        "guestCount": 2,
+        "status": "standard"
+      },
+      "staffId": "mika",
+      "description": "Contemporary duplex blending modern luxury with traditional Japanese design elements."
+    },
+    {
+      "id": "moiwa-suite",
+      "name": "Moiwa Suite",
+      "type": "Intimate Sophistication",
+      "location": "Floor 2, West Wing",
+      "image": "/hotel3.jpg",
+      "bedrooms": 2,
+      "bathrooms": 2,
+      "maxGuests": 4,
+      "sqm": 120,
+      "amenities": ["Private Onsen", "Mt. Moiwa Views", "Floor-to-Ceiling Windows", "Heated Floors", "Garden View", "Tatami Room"],
+      "status": "occupied",
+      "guest": {
+        "id": "chen-couple",
+        "name": "Mr. & Mrs. Chen",
+        "checkIn": "Dec 10",
+        "checkOut": "Dec 13",
+        "guestCount": 2,
+        "status": "standard"
+      },
+      "staffId": "kenji",
+      "description": "An intimate retreat offering refined luxury with views of the iconic Mt. Moiwa."
+    },
+    {
+      "id": "weiss-suite",
+      "name": "Weiss Suite",
+      "type": "Refined Simplicity",
+      "location": "Floor 2, East Wing",
+      "image": "/hotel3.jpg",
+      "bedrooms": 1,
+      "bathrooms": 1,
+      "maxGuests": 2,
+      "sqm": 85,
+      "amenities": ["Private Onsen", "Mountain Views", "Floor-to-Ceiling Windows", "Heated Floors", "Work Desk", "Private Bar"],
+      "status": "occupied",
+      "guest": {
+        "id": "dr-yamamoto",
+        "name": "Dr. Yamamoto",
+        "checkIn": "Dec 9",
+        "checkOut": "Dec 13",
+        "guestCount": 1,
+        "status": "standard"
+      },
+      "staffId": "kenji",
+      "description": "Elegant simplicity meets mountain luxury in this perfectly appointed suite for discerning travelers."
+    }
+  ]
+}
