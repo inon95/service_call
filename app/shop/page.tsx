@@ -265,7 +265,7 @@ export default function HotelBoutiquePage() {
           </Link>
 
           {/* Center - Menu Items */}
-          <div className="flex items-center gap-1 bg-white/5 backdrop-blur-md rounded-full px-2 py-1.5 border border-white/10">
+          {/* <div className="flex items-center gap-1 bg-white/5 backdrop-blur-md rounded-full px-2 py-1.5 border border-white/10">
             {menuItems.map((item) => (
               <Link
                 key={item.label}
@@ -279,16 +279,16 @@ export default function HotelBoutiquePage() {
                 {item.label}
               </Link>
             ))}
-          </div>
+          </div> */}
 
           {/* Right - Logout */}
-          <button
+          {/* <button
             onClick={handleLogout}
             className="flex items-center gap-2 px-4 py-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all"
           >
             <span className="text-sm">Logout</span>
             <LogOut className="w-4 h-4" />
-          </button>
+          </button> */}
         </nav>
 
         {/* Main Content - Two Column Layout */}
