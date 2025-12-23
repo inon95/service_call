@@ -964,6 +964,18 @@ export default function VoiceSessionChat({ agentId, sessionId = 'default', eleve
           }
         }
 
+        // Check if getUserMedia is available (required for voice)
+        if (typeof navigator === 'undefined' || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          console.error('❌ getUserMedia not available - microphone access not supported');
+          setIsVapiLoading(false);
+          setMessages(prev => [...prev, {
+            role: 'assistant',
+            content: 'מיקרופון לא זמין. אנא ודא שאתה משתמש בדפדפן התומך בהקלטה.',
+            timestamp: Date.now()
+          }]);
+          return;
+        }
+
         try {
           await elevenLabsConversation.startSession(sessionConfig);
           console.log('✅ startSession completed successfully');
@@ -1296,7 +1308,7 @@ Use this data to answer questions about guests. When asked about a specific gues
             {/* Welcome Message */}
             <p className={`text-sm leading-relaxed max-w-[280px] ${isDark ? 'text-white/70' : 'text-stone-600'}`}>
               {welcomeMessage?.includes('נא להמתין') ? (
-                <span className="animate-pulse font-bold text-lg">{welcomeMessage}</span>
+                <span className="animate-pulse font-semibold text-[13px] leading-5 block text-center">{welcomeMessage}</span>
               ) : (welcomeMessage || 'I\'m here to help. Tap below to start a conversation.')}
             </p>
 
@@ -1361,16 +1373,18 @@ Use this data to answer questions about guests. When asked about a specific gues
       </div>
 
       {/* Chat Input - Fixed to bottom */}
-      <div className="absolute bottom-[5px] left-3 right-3 bg-white/90 backdrop-blur-sm rounded-xl shadow-sm">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder="הקלד הודעה..."
-          className="w-full px-4 py-3 text-sm rounded-xl focus:outline-none text-right bg-transparent"
-          dir="rtl"
-        />
+      <div className="absolute bottom-0 left-0 right-0 p-3 bg-transparent">
+        <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm">
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="הקלד הודעה..."
+            className="w-full px-4 py-3 text-sm rounded-xl focus:outline-none text-right bg-transparent"
+            dir="rtl"
+          />
+        </div>
       </div>
 
       {/* Voice Action Modal */}

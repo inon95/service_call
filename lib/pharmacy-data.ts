@@ -24,6 +24,7 @@ export interface PharmacyProduct {
   wholesaleMinUnits?: number;
   inStock: boolean;
   gmpCertified: boolean;
+  badge?: 'new' | 'sale';
 }
 
 export const pharmacyProducts: PharmacyProduct[] = [
@@ -54,6 +55,7 @@ export const pharmacyProducts: PharmacyProduct[] = [
     wholesaleMinUnits: 10,
     inStock: true,
     gmpCertified: true,
+    badge: 'sale',
   },
   {
     id: 'blue-dream-b3',
@@ -82,6 +84,7 @@ export const pharmacyProducts: PharmacyProduct[] = [
     wholesaleMinUnits: 10,
     inStock: true,
     gmpCertified: true,
+    badge: 'new',
   },
   {
     id: 'og-kush-k1',

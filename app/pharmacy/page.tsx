@@ -15,12 +15,14 @@ function ProductCard({
   product,
   onAskQuestion,
   basket,
-  onUpdateBasket
+  onUpdateBasket,
+  isGlowing
 }: {
   product: PharmacyProduct;
-  onAskQuestion: (productName: string) => void;
+  onAskQuestion: (productId: string, productName: string) => void;
   basket: Basket;
   onUpdateBasket: (productId: string, quantity: number) => void;
+  isGlowing: boolean;
 }) {
   const [activeView, setActiveView] = useState<'image' | 'details'>('image');
   const quantity = basket[product.id] || 0;
@@ -36,32 +38,25 @@ function ProductCard({
   };
 
   return (
-    <div className="product-card">
+    <div className={`product-card ${isGlowing ? 'product-glow' : ''}`}>
       {/* IMAGE TAB */}
       {activeView === 'image' && (
         <div className="tab-content image-view">
           <div className="image-container">
             <span className="strain-type">{product.strainType}</span>
-            <div className={`stock-indicator ${product.inStock ? '' : 'out-of-stock'}`}>
-              <span className="stock-dot"></span>
-              {product.inStock ? 'במלאי' : 'אזל'}
-            </div>
-            <button
-              className="ask-question-btn"
-              onClick={() => onAskQuestion(product.name)}
-              title="שאל שאלה על המוצר"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
-              </svg>
-            </button>
             <img
               src={product.image}
               alt={product.name}
               className="product-image"
             />
-            <h2 className="product-name">{product.name}</h2>
+            <div className="product-name-container">
+              <h2 className="product-name">{product.name}</h2>
+              {product.badge && (
+                <span className={`promo-badge ${product.badge === 'sale' ? 'badge-sale' : 'badge-new'}`}>
+                  {product.badge === 'sale' ? 'במבצע' : 'חדש'}
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="product-info">
@@ -130,9 +125,18 @@ function ProductCard({
                 </div>
               )}
               <button className="btn btn-secondary" onClick={() => setActiveView('details')}>
-                מידע נוסף
+                פרטי מוצר
               </button>
             </div>
+            <button
+              className="inquiry-link"
+              onClick={() => onAskQuestion(product.id, product.name)}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+              בירור על המוצר
+            </button>
           </div>
         </div>
       )}
@@ -143,6 +147,13 @@ function ProductCard({
           <div className="details-header">
             <span className="badge badge-strain">{product.strainType}</span>
             <h2 className="details-product-name">{product.name}</h2>
+          </div>
+
+          <div className="product-description">
+            <p>
+              {product.name} הוא זן {product.strainType} מבית {product.manufacturer} עם פרופיל של T{product.thc}/C{Math.ceil(product.cbd)}.
+              {' '}מגודל בשיטת {product.growingMethod}, מתאפיין בטרפנים {product.terpenes.slice(0, 2).map(t => t.name).join(' ו')} המעניקים לו את אופיו הייחודי.
+            </p>
           </div>
 
           <div className="detail-section">
@@ -182,27 +193,6 @@ function ProductCard({
             </div>
           </div>
 
-          <div className="detail-section">
-            <h3 className="section-title">מידע נוסף</h3>
-            <div className="info-list">
-              <div className="info-item">
-                <span>יצרן:</span>
-                <strong>{product.manufacturer}</strong>
-              </div>
-              <div className="info-item">
-                <span>מספר אצווה:</span>
-                <strong>{product.batchNumber}</strong>
-              </div>
-              <div className="info-item">
-                <span>תאריך ייצור:</span>
-                <strong>{product.productionDate}</strong>
-              </div>
-              <div className="info-item">
-                <span>תוקף:</span>
-                <strong>{product.expiryDate}</strong>
-              </div>
-            </div>
-          </div>
 
           <div className="details-actions">
             <div className="pricing-section">
@@ -236,23 +226,48 @@ function ProductCard({
                 חזרה
               </button>
             </div>
+            <button
+              className="inquiry-link"
+              onClick={() => onAskQuestion(product.id, product.name)}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+              בירור על המוצר
+            </button>
           </div>
         </div>
       )}
 
       <style jsx>{`
         .product-card {
-          max-width: 380px;
+          max-width: 100%;
           width: 100%;
-          background: white;
-          border-radius: 12px;
+          background: #f8f9fa;
+          border-radius: 16px;
           overflow: hidden;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          box-shadow: 0 1px 3px rgba(0,0,0,0.06);
           transition: box-shadow 0.3s ease;
+          border: 1px solid rgba(0,0,0,0.04);
+        }
+
+        @media (min-width: 640px) {
+          .product-card {
+            max-width: 380px;
+          }
         }
 
         .product-card:hover {
-          box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .product-glow {
+          animation: product-pulse-glow 1.5s ease-in-out 2;
+        }
+
+        @keyframes product-pulse-glow {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(16, 132, 126, 0.4); }
+          50% { box-shadow: 0 0 0 12px rgba(16, 132, 126, 0); }
         }
 
         .tab-content {
@@ -271,11 +286,11 @@ function ProductCard({
 
         .image-container {
           position: relative;
-          background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-          padding: 30px;
+          background: #fafbfc;
+          padding: 16px;
           text-align: center;
           border-bottom: none;
-          height: 350px;
+          height: 300px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -283,12 +298,12 @@ function ProductCard({
 
         .product-image {
           width: 100%;
-          max-width: 280px;
-          height: 280px;
-          background: white;
-          border-radius: 8px;
-          padding: 15px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+          max-width: 255px;
+          height: 245px;
+          background: #f8f9fa;
+          border-radius: 12px;
+          padding: 10px;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.04);
           object-fit: contain;
         }
 
@@ -296,7 +311,7 @@ function ProductCard({
           position: absolute;
           top: 15px;
           left: 15px;
-          background: white;
+          background: #f8f9fa;
           padding: 6px 12px;
           border-radius: 20px;
           font-size: 11px;
@@ -306,97 +321,67 @@ function ProductCard({
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        .stock-indicator {
-          position: absolute;
-          top: 15px;
-          right: 15px;
-          background: #10847e;
-          color: white;
-          padding: 6px 12px;
-          border-radius: 20px;
-          font-size: 11px;
-          font-weight: 600;
-          display: flex;
-          align-items: center;
-          justify-content: flex-start;
-          gap: 5px;
-          min-width: 60px;
-        }
-
-        .stock-indicator.out-of-stock {
-          background: #adb5bd;
-        }
-
-        .ask-question-btn {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 50px;
-          height: 50px;
-          border-radius: 50%;
-          background: rgba(16, 132, 126, 0.9);
-          border: none;
-          color: white;
+        .inquiry-link {
           display: flex;
           align-items: center;
           justify-content: center;
+          gap: 6px;
+          width: 100%;
+          padding: 8px 0;
+          margin-top: 8px;
+          background: transparent;
+          border: none;
+          color: #6c757d;
+          font-size: 12px;
+          font-weight: 500;
           cursor: pointer;
-          transition: all 0.3s ease;
-          box-shadow: 0 4px 15px rgba(16, 132, 126, 0.4);
-          z-index: 10;
-          opacity: 0;
+          transition: color 0.2s ease;
         }
 
-        .image-container:hover .ask-question-btn {
+        .inquiry-link:hover {
+          color: #10847e;
+        }
+
+        .inquiry-link svg {
+          opacity: 0.7;
+        }
+
+        .inquiry-link:hover svg {
           opacity: 1;
         }
 
-        .ask-question-btn:hover {
-          background: #10847e;
-          transform: translate(-50%, -50%) scale(1.15);
-          box-shadow: 0 6px 20px rgba(16, 132, 126, 0.5);
-        }
-
-        .stock-dot {
-          width: 6px;
-          height: 6px;
-          background: white;
-          border-radius: 50%;
-          animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
-        }
-
         .product-info {
-          padding: 20px;
+          padding: 16px;
         }
 
         .product-header {
           margin-bottom: 15px;
         }
 
-        .product-name {
+        .product-name-container {
           position: absolute;
-          bottom: 15px;
-          right: 15px;
-          font-size: 20px;
-          font-weight: 700;
-          color: #212529;
+          bottom: 12px;
+          right: 12px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          background: #f8f9fa;
+          padding: 5px 10px;
+          border-radius: 8px;
+          box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+        }
+
+        .product-name {
+          font-size: 17px;
+          font-weight: 600;
+          color: #374151;
           margin: 0;
-          background: white;
-          padding: 6px 12px;
-          border-radius: 6px;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .strain-type {
           position: absolute;
-          top: 15px;
-          left: 15px;
+          top: 12px;
+          left: 12px;
           background: #EDF3F1;
           color: #4E6F68;
           border: 1px solid #D0DDD9;
@@ -407,18 +392,38 @@ function ProductCard({
           z-index: 10;
         }
 
+        .promo-badge {
+          padding: 3px 8px;
+          border-radius: 12px;
+          font-size: 10px;
+          font-weight: 700;
+          white-space: nowrap;
+        }
+
+        .badge-sale {
+          background: #FEE2E2;
+          color: #DC2626;
+          border: 1px solid #FECACA;
+        }
+
+        .badge-new {
+          background: #DBEAFE;
+          color: #2563EB;
+          border: 1px solid #BFDBFE;
+        }
+
         .cannabinoid-info {
-          background: #f8f9fa;
-          border-radius: 8px;
-          padding: 15px;
-          margin-bottom: 15px;
-          border-right: 4px solid #10847e;
+          background: #f9fafb;
+          border-radius: 10px;
+          padding: 12px;
+          margin-bottom: 12px;
+          border-right: 3px solid #10847e;
         }
 
         .cannabinoid-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 12px;
+          gap: 8px;
         }
 
         .cannabinoid-item {
@@ -426,55 +431,56 @@ function ProductCard({
         }
 
         .cannabinoid-label {
-          font-size: 11px;
-          color: #6c757d;
-          font-weight: 600;
+          font-size: 10px;
+          color: #9ca3af;
+          font-weight: 500;
           text-transform: uppercase;
-          margin-bottom: 4px;
+          margin-bottom: 2px;
         }
 
         .cannabinoid-value {
-          font-size: 24px;
-          font-weight: 700;
+          font-size: 20px;
+          font-weight: 600;
           color: #10847e;
         }
 
         .product-details {
           display: grid;
-          gap: 8px;
-          margin-bottom: 15px;
-          font-size: 13px;
+          gap: 4px;
+          margin-bottom: 12px;
+          font-size: 12px;
         }
 
         .detail-row {
           display: flex;
           justify-content: space-between;
-          padding: 8px 0;
-          border-bottom: 1px solid #e9ecef;
+          padding: 6px 9px;
+          border-bottom: 1px solid #f3f4f6;
         }
 
         .detail-label {
-          color: #6c757d;
-          font-weight: 600;
-        }
-
-        .detail-value {
-          color: #212529;
+          color: #9ca3af;
           font-weight: 500;
         }
 
+        .detail-value {
+          color: #4b5563;
+          font-weight: 700;
+        }
+
         .pricing-section {
-          background: #fff3cd;
-          border-radius: 8px;
-          padding: 12px;
-          margin-bottom: 15px;
+          background: #fefce8;
+          border-radius: 10px;
+          padding: 10px;
+          margin-bottom: 12px;
+          border: 1px solid #fef08a;
         }
 
         .price-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 10px;
-          font-size: 13px;
+          gap: 8px;
+          font-size: 12px;
         }
 
         .price-item {
@@ -482,32 +488,32 @@ function ProductCard({
         }
 
         .price-label {
-          color: #856404;
-          font-size: 11px;
-          margin-bottom: 3px;
-          font-weight: 600;
+          color: #a16207;
+          font-size: 10px;
+          margin-bottom: 2px;
+          font-weight: 500;
         }
 
         .price-value {
-          color: #212529;
-          font-weight: 700;
-          font-size: 16px;
+          color: #374151;
+          font-weight: 600;
+          font-size: 15px;
         }
 
         .action-buttons {
           display: grid;
           grid-template-columns: 1fr 1fr;
-          gap: 10px;
+          gap: 8px;
         }
 
         .btn {
-          padding: 12px 20px;
+          padding: 10px 16px;
           border: none;
-          border-radius: 8px;
-          font-size: 14px;
-          font-weight: 600;
+          border-radius: 10px;
+          font-size: 13px;
+          font-weight: 500;
           cursor: pointer;
-          transition: all 0.3s ease;
+          transition: all 0.2s ease;
           text-align: center;
         }
 
@@ -528,7 +534,7 @@ function ProductCard({
         }
 
         .btn-secondary {
-          background: white;
+          background: #f8f9fa;
           color: #10847e;
           border: 2px solid #10847e;
         }
@@ -597,7 +603,7 @@ function ProductCard({
           font-weight: 700;
           color: #212529;
           margin: 0;
-          background: white;
+          background: #f8f9fa;
           padding: 6px 12px;
           border-radius: 6px;
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -612,8 +618,8 @@ function ProductCard({
 
         .badge-strain {
           position: absolute;
-          top: 10px;
-          left: 15px;
+          top: -8px;
+          left: -8px;
           background: #EDF3F1;
           color: #4E6F68;
           border: 1px solid #D0DDD9;
@@ -621,6 +627,19 @@ function ProductCard({
           border-radius: 20px;
           font-size: 11px;
           font-weight: 600;
+        }
+
+        .product-description {
+          padding: 4px 0 12px 0;
+          margin-bottom: 16px;
+          border-bottom: 1px solid #e9ecef;
+        }
+
+        .product-description p {
+          font-size: 13px;
+          line-height: 1.6;
+          color: #4b5563;
+          margin: 0;
         }
 
         .detail-section {
@@ -751,6 +770,32 @@ export default function PharmacyPage() {
   const [isBasketOpen, setIsBasketOpen] = useState(false);
   const [showScrollUp, setShowScrollUp] = useState(false);
   const [basketAnimating, setBasketAnimating] = useState(false);
+  const [glowingProductId, setGlowingProductId] = useState<string | null>(null);
+
+  // Filter state
+  const [filterStrain, setFilterStrain] = useState<string | null>(null);
+  const [filterServingType, setFilterServingType] = useState<string | null>(null);
+  const [filterProfile, setFilterProfile] = useState<string | null>(null);
+
+  // Get unique filter options from products
+  const uniqueStrains = [...new Set(pharmacyProducts.map(p => p.strainType))];
+  const uniqueServingTypes = [...new Set(pharmacyProducts.map(p => p.servingType))];
+
+  // THC Profile helper
+  const getProfile = (thc: number, cbd: number): string => {
+    if (cbd > thc) return 'CBD Rich';
+    if (thc > 15 && cbd < 5) return 'THC Rich';
+    return 'Balanced';
+  };
+  const uniqueProfiles = [...new Set(pharmacyProducts.map(p => getProfile(p.thc, p.cbd)))];
+
+  // Filter products
+  const filteredProducts = pharmacyProducts.filter(product => {
+    if (filterStrain && product.strainType !== filterStrain) return false;
+    if (filterServingType && product.servingType !== filterServingType) return false;
+    if (filterProfile && getProfile(product.thc, product.cbd) !== filterProfile) return false;
+    return true;
+  });
 
   // Calculate basket totals
   const basketTotalUnits = Object.values(basket).reduce((sum, qty) => sum + qty, 0);
@@ -792,14 +837,38 @@ export default function PharmacyPage() {
     setTimeout(() => setBasketAnimating(false), 3000);
   };
 
-  const handleAskQuestion = (productName: string) => {
+  const handleAskQuestion = (productId: string, productName: string) => {
     setSelectedProduct(productName);
+    setGlowingProductId(productId);
     setIsAssistantOpen(true);
+    // Stop glowing after 3 seconds
+    setTimeout(() => setGlowingProductId(null), 3000);
   };
 
   return (
     <div className="min-h-screen relative" dir="rtl">
       <style jsx global>{`
+        html, body {
+          scroll-behavior: smooth;
+        }
+        .products-scroll {
+          scroll-behavior: smooth;
+          -webkit-overflow-scrolling: touch;
+        }
+        .products-scroll::-webkit-scrollbar {
+          width: 8px;
+        }
+        .products-scroll::-webkit-scrollbar-track {
+          background: rgba(0,0,0,0.1);
+          border-radius: 4px;
+        }
+        .products-scroll::-webkit-scrollbar-thumb {
+          background: rgba(16, 132, 126, 0.5);
+          border-radius: 4px;
+        }
+        .products-scroll::-webkit-scrollbar-thumb:hover {
+          background: rgba(16, 132, 126, 0.7);
+        }
         @keyframes pulse-glow {
           0%, 100% { box-shadow: 0 0 0 0 rgba(16, 132, 126, 0.4); }
           50% { box-shadow: 0 0 0 8px rgba(16, 132, 126, 0); }
@@ -825,57 +894,169 @@ export default function PharmacyPage() {
       <div className={`relative z-10 min-h-screen flex flex-col transition-opacity duration-500 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
 
         {/* Header */}
-        <header className="sticky top-0 z-30 flex items-center justify-between px-6 py-4 bg-white/95 backdrop-blur-sm border-b border-gray-200">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-[#10847e] flex items-center justify-center">
-              <span className="text-white font-bold text-sm">CP</span>
+        <header className="sticky top-0 z-30 flex flex-col sm:flex-row items-center justify-between px-4 sm:px-6 py-3 sm:py-4 bg-[#f8f9fa]/95 backdrop-blur-sm border-b border-gray-200 gap-3 sm:gap-0">
+          {/* Right side - Logo */}
+          <Link href="/" className="flex items-center gap-2 sm:gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-[#10847e] flex items-center justify-center">
+              <span className="text-white font-bold text-xs sm:text-sm">CP</span>
             </div>
             <div>
-              <h1 className="text-lg font-bold text-gray-900">בית מסחר לתרופות</h1>
-              <p className="text-xs text-gray-500">מערכת הזמנות B2B</p>
+              <h1 className="text-base sm:text-lg font-bold text-gray-900">בית מסחר לתרופות</h1>
+              <p className="text-[10px] sm:text-xs text-gray-500">מערכת הזמנות B2B</p>
             </div>
           </Link>
 
-          <div className="flex items-center gap-3">
-            {basketTotalUnits > 0 ? (
+          {/* Left side - Order Summary and Call button */}
+          <div className="flex items-center gap-4 w-full sm:w-auto">
+            {/* Order Summary */}
+            <div className="flex items-center gap-3 w-full sm:w-auto sm:border-l sm:border-gray-300 sm:pl-4">
+              <span className="hidden sm:inline text-sm text-gray-600 font-medium">סיכום הזמנה:</span>
               <button
                 onClick={() => setIsBasketOpen(true)}
-                className={`flex items-center gap-2 px-3 py-1.5 bg-[#10847e] text-white rounded-lg hover:bg-[#0a6b66] transition-colors ${basketAnimating ? 'basket-glow' : ''}`}
+                className={`flex items-center gap-2 px-3 py-1.5 ${basketTotalUnits > 0 ? 'bg-[#10847e] text-white' : 'bg-gray-100 text-gray-500'} rounded-lg hover:opacity-90 transition-colors cursor-pointer w-full sm:w-auto justify-center sm:justify-start ${basketAnimating ? 'basket-glow' : ''}`}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
                   <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
                 </svg>
-                <span className="font-medium">{basketTotalUnits} יח׳</span>
-                <span className="text-white/80">|</span>
-                <span className="font-bold">₪{basketTotalPrice.toLocaleString()}</span>
-                <span className="text-white/70 text-xs">כולל מע"מ</span>
+                {basketTotalUnits > 0 ? (
+                  <>
+                    <span className="font-medium">{basketTotalUnits} יח׳</span>
+                    <span className="text-white/80">|</span>
+                    <span className="font-bold">₪{basketTotalPrice.toLocaleString()}</span>
+                    <span className="text-white/70 text-xs hidden sm:inline">כולל מע"מ</span>
+                  </>
+                ) : (
+                  <span className="font-medium">סל ריק</span>
+                )}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mr-1">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
               </button>
-            ) : (
-              <span className="text-sm text-gray-500">
-                {pharmacyProducts.length} מוצרים
-              </span>
-            )}
+            </div>
+
+            {/* Call button */}
+            <button
+              onClick={() => setIsAssistantOpen(true)}
+              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-[#10847e] text-white rounded-lg hover:bg-[#0a6b66] transition-colors text-sm font-medium shadow-sm cursor-pointer"
+            >
+              <Phone className="w-4 h-4" />
+              <span>מוקד שירות</span>
+            </button>
           </div>
         </header>
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col min-h-0">
+          {/* Filters */}
+          <div className="border-b border-gray-300/50 px-4 sm:px-6 py-4">
+            {/* Filter Groups */}
+            <div className="flex flex-wrap items-center gap-3 justify-start">
+
+              {/* Results count */}
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-200/60 rounded-lg">
+                <span className="text-xs text-gray-500">נמצאו</span>
+                <span className="text-sm font-bold text-[#10847e]">{filteredProducts.length}</span>
+                <span className="text-xs text-gray-500">מוצרים</span>
+              </div>
+
+              {/* Divider */}
+              <div className="hidden sm:block w-px h-6 bg-gray-300/60" />
+
+              {/* Profile Filter */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-bold text-white drop-shadow-sm">פרופיל:</span>
+                {uniqueProfiles.map(profile => (
+                  <button
+                    key={profile}
+                    onClick={() => setFilterProfile(filterProfile === profile ? null : profile)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 border ${
+                      filterProfile === profile
+                        ? 'bg-[#10847e] text-white shadow-sm border-[#10847e]'
+                        : 'bg-white/50 backdrop-blur-sm text-gray-800 border-gray-400 hover:bg-white/70 hover:border-gray-500'
+                    }`}
+                  >
+                    {profile}
+                  </button>
+                ))}
+              </div>
+
+              {/* Divider */}
+              <div className="hidden sm:block w-px h-6 bg-gray-300/60" />
+
+              {/* Serving Type Filter */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-bold text-white drop-shadow-sm">צורת הגשה:</span>
+                {uniqueServingTypes.map(type => (
+                  <button
+                    key={type}
+                    onClick={() => setFilterServingType(filterServingType === type ? null : type)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 border ${
+                      filterServingType === type
+                        ? 'bg-[#10847e] text-white shadow-sm border-[#10847e]'
+                        : 'bg-white/50 backdrop-blur-sm text-gray-800 border-gray-400 hover:bg-white/70 hover:border-gray-500'
+                    }`}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </div>
+
+              {/* Divider */}
+              <div className="hidden sm:block w-px h-6 bg-gray-300/60" />
+
+              {/* Strain Type Filter */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-bold text-white drop-shadow-sm">זן:</span>
+                {uniqueStrains.map(strain => (
+                  <button
+                    key={strain}
+                    onClick={() => setFilterStrain(filterStrain === strain ? null : strain)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 border ${
+                      filterStrain === strain
+                        ? 'bg-[#10847e] text-white shadow-sm border-[#10847e]'
+                        : 'bg-white/50 backdrop-blur-sm text-gray-800 border-gray-400 hover:bg-white/70 hover:border-gray-500'
+                    }`}
+                  >
+                    {strain}
+                  </button>
+                ))}
+              </div>
+
+              {/* Divider */}
+              {(filterStrain || filterServingType || filterProfile) && (
+                <div className="hidden sm:block w-px h-6 bg-gray-300/60" />
+              )}
+
+              {/* Clear button - right side with filters */}
+              {(filterStrain || filterServingType || filterProfile) && (
+                <button
+                  onClick={() => {
+                    setFilterStrain(null);
+                    setFilterServingType(null);
+                    setFilterProfile(null);
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-500/70 backdrop-blur-sm text-white border border-red-400 hover:bg-red-500/90 transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                  נקה הכל
+                </button>
+              )}
+
+            </div>
+          </div>
+
           {/* Products Area */}
-          <div className="flex-1 overflow-y-auto p-6 bg-gray-100/40 backdrop-blur-sm">
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 380px))',
-              gap: '24px',
-              justifyContent: 'center'
-            }}>
-              {pharmacyProducts.map(product => (
+          <div className="flex-1 overflow-y-auto p-3 sm:p-6 bg-gray-100/40 backdrop-blur-sm products-scroll">
+            <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fill,minmax(340px,380px))] gap-4 sm:gap-6 justify-center max-w-[400px] sm:max-w-none mx-auto">
+              {filteredProducts.map(product => (
                 <ProductCard
                   key={product.id}
                   product={product}
                   onAskQuestion={handleAskQuestion}
                   basket={basket}
                   onUpdateBasket={updateBasket}
+                  isGlowing={glowingProductId === product.id}
                 />
               ))}
             </div>
@@ -901,22 +1082,7 @@ export default function PharmacyPage() {
         {/* Floating Chat Modal */}
         {isAssistantOpen && (
           <>
-            <div style={{
-              position: 'fixed',
-              bottom: '24px',
-              left: '24px',
-              width: '380px',
-              height: '525px',
-              background: 'rgba(100, 100, 100, 0.15)',
-              backdropFilter: 'blur(1px)',
-              borderRadius: '20px',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.2)',
-              zIndex: 101,
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-              border: '1px solid rgba(255, 255, 255, 0.2)'
-            }}>
+            <div className="fixed inset-2 sm:inset-auto sm:bottom-6 sm:left-6 sm:w-[380px] sm:h-[525px] bg-white/15 backdrop-blur-sm rounded-2xl shadow-2xl z-[101] flex flex-col overflow-hidden border border-white/20">
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -953,16 +1119,6 @@ export default function PharmacyPage() {
                         animation: 'pulse 2s infinite'
                       }}></span>
                       <span style={{ fontSize: '12px', opacity: 0.9 }}>זמין</span>
-                      {selectedProduct && (
-                        <span style={{
-                          fontSize: '11px',
-                          opacity: 0.8,
-                          background: 'rgba(255,255,255,0.2)',
-                          padding: '2px 8px',
-                          borderRadius: '10px',
-                          marginRight: '4px'
-                        }}>{selectedProduct}</span>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -1009,36 +1165,32 @@ export default function PharmacyPage() {
                   </button>
                 </div>
               </div>
-              <div style={{ flex: 1, overflow: 'hidden' }}>
+              <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
                 <style>{`
                   .hide-chat-header > div > div:first-child { display: none !important; }
-                  .hide-chat-header { direction: rtl; text-align: right; }
+                  .hide-chat-header { direction: rtl; text-align: right; height: 100%; }
                   .hide-chat-header * { text-align: right; }
-                  .hide-chat-header > div { background: transparent !important; }
+                  .hide-chat-header > div { background: transparent !important; height: 100%; }
                   .hide-chat-header > div > div { background: transparent !important; }
+                  .hide-chat-header > div > div:nth-child(2) {
+                    height: calc(100% - 60px) !important;
+                    max-height: calc(100% - 60px) !important;
+                  }
                 `}</style>
-                <div className="hide-chat-header">
+                <div className="hide-chat-header" style={{ height: '100%' }}>
                 <VoiceSessionChat
                   agentId="pharmacy-concierge"
                   sessionId="pharmacy-session"
                   elevenLabsAgentId={process.env.NEXT_PUBLIC_ELEVENLABS_BOUTIQUE_AGENT_ID}
                   title=""
                   avatar=""
-                  welcomeMessage={selectedProduct
-                    ? `נא להמתין בבקשה. בנושא ${selectedProduct}.`
-                    : "נא להמתין בבקשה."}
-                  suggestions={selectedProduct
-                    ? [
-                        `מה ההתוויות?`,
-                        `תופעות לוואי?`,
-                        `מתאים לי?`
-                      ]
-                    : [
-                        "מידע על המוצר",
-                        "לאיזה מצבים זה מתאים?",
-                        "מה עדיף - פרחים או שמן?",
-                        "מידע כללי על קנאביס רפואי"
-                      ]}
+                  welcomeMessage="נא להמתין בבקשה. נשמח אם כבר תכתבו את השאלה."
+                  suggestions={[
+                    "מידע על המוצר",
+                    "לאיזה מצבים זה מתאים?",
+                    "מה עדיף - פרחים או שמן?",
+                    "מידע כללי על קנאביס רפואי"
+                  ]}
                   contextData={{
                     products: pharmacyProducts.map(p => ({
                       id: p.id,
@@ -1049,10 +1201,11 @@ export default function PharmacyPage() {
                       manufacturer: p.manufacturer,
                       inStock: p.inStock
                     })),
-                    selectedProduct
+                    selectedProductId: selectedProduct ? pharmacyProducts.find(p => p.name === selectedProduct)?.id : null,
+                    selectedProductName: selectedProduct
                   }}
                   variant="light"
-                  language="he"
+                  language="en"
                   autoStart={true}
                   speakerEnabled={speakerOn}
                 />
@@ -1107,60 +1260,68 @@ export default function PharmacyPage() {
         {!isAssistantOpen && (
           <button
             onClick={() => setIsAssistantOpen(true)}
-            className="fixed bottom-[66px] right-6 w-14 h-14 bg-[#10847e] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#0a6b66] transition-colors z-40"
+            className="fixed bottom-[66px] right-3 sm:right-6 w-12 h-12 sm:w-14 sm:h-14 bg-[#10847e] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#0a6b66] transition-colors z-40"
             title="פתח עוזר רוקח"
           >
             <MessageCircle className="w-6 h-6" />
           </button>
         )}
 
-        {/* Basket Modal */}
+        {/* Floating Call Button - Mobile only */}
+        {!isAssistantOpen && (
+          <button
+            onClick={() => setIsAssistantOpen(true)}
+            className="fixed bottom-[124px] right-3 w-12 h-12 bg-white border border-gray-300 text-[#10847e] rounded-full shadow-lg flex sm:hidden items-center justify-center hover:bg-gray-50 transition-colors z-40"
+            title="פתח מוקד שירות"
+          >
+            <Phone className="w-5 h-5" />
+          </button>
+        )}
+
+        {/* Basket Dropdown */}
         {isBasketOpen && (
           <>
-            {/* Backdrop */}
+            {/* Click outside to close */}
             <div
-              className="fixed inset-0 bg-black/50 z-50"
+              className="fixed inset-0 z-40"
               onClick={() => setIsBasketOpen(false)}
             />
-            {/* Modal */}
-            <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md bg-white rounded-xl shadow-2xl z-50 max-h-[80vh] flex flex-col">
-              {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                <h2 className="text-lg font-bold text-gray-900">סיכום הזמנה</h2>
-                <button
-                  onClick={() => setIsBasketOpen(false)}
-                  className="p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+            {/* Dropdown */}
+            <div className="fixed top-[110px] sm:top-[79px] left-2 right-2 sm:left-auto sm:right-[240px] w-auto sm:w-[380px] bg-[#f8f9fa]/95 backdrop-blur-sm border border-gray-200 rounded-lg sm:rounded-b-lg shadow-lg z-50 max-h-[60vh] sm:max-h-[70vh] flex flex-col">
               {/* Items */}
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                {Object.entries(basket).map(([productId, qty]) => {
+                {Object.entries(basket).map(([productId, qty], index) => {
                   const product = pharmacyProducts.find(p => p.id === productId);
                   if (!product) return null;
+                  const minQty = 20;
+                  const isUnderMinimum = qty < minQty;
                   return (
-                    <div key={productId} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-12 h-12 object-cover rounded-lg"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-900 truncate">{product.name}</p>
-                        <p className="text-sm text-gray-500">{product.strainType}</p>
+                    <div key={productId} className="p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-12 h-12 object-cover rounded-lg"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-gray-900 truncate">{product.name}</p>
+                          <p className="text-sm text-gray-500">{product.strainType}</p>
+                        </div>
+                        <div className="text-left">
+                          <p className="font-bold text-gray-900">₪{(product.packPrice * qty).toLocaleString()}</p>
+                          <p className="text-sm text-gray-500">{qty} × ₪{product.packPrice}</p>
+                        </div>
+                        <button
+                          onClick={() => updateBasket(productId, 0)}
+                          className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg"
+                          title="הסר מההזמנה"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
                       </div>
-                      <div className="text-left">
-                        <p className="font-bold text-gray-900">₪{(product.packPrice * qty).toLocaleString()}</p>
-                        <p className="text-sm text-gray-500">{qty} × ₪{product.packPrice}</p>
-                      </div>
-                      <button
-                        onClick={() => updateBasket(productId, 0)}
-                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg"
-                        title="הסר מההזמנה"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
+                      {isUnderMinimum && (
+                        <p className="text-xs text-red-500 mt-2">מתחת לכמות מינימום ({minQty} יחידות)</p>
+                      )}
                     </div>
                   );
                 })}
@@ -1196,7 +1357,7 @@ export default function PharmacyPage() {
         {showScrollUp && (
           <button
             onClick={scrollToTop}
-            className="fixed bottom-6 left-6 w-12 h-12 bg-[#10847e] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#0a6b66] transition-all z-40"
+            className="fixed bottom-6 left-3 sm:left-6 w-10 h-10 sm:w-12 sm:h-12 bg-[#10847e] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#0a6b66] transition-all z-40"
             title="חזרה למעלה"
           >
             <ArrowUp className="w-5 h-5" />
