@@ -13,8 +13,8 @@ interface LanguageState {
 export const useLanguageStore = create<LanguageState>()(
   persist(
     (set) => ({
-      language: 'en',
-      translations: getTranslations('en'),
+      language: 'he' as Language,  // Default to Hebrew
+      translations: getTranslations('en'),  // UI translations still use 'en' as Hebrew not available
       setLanguage: (lang: Language) => set({
         language: lang,
         translations: getTranslations(lang)

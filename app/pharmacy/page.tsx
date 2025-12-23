@@ -231,7 +231,7 @@ function ProductCard({ product }: { product: PharmacyProduct }) {
           background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
           padding: 30px;
           text-align: center;
-          border-bottom: 3px solid #28a745;
+          border-bottom: 3px solid #10847e;
           height: 350px;
           display: flex;
           align-items: center;
@@ -258,8 +258,8 @@ function ProductCard({ product }: { product: PharmacyProduct }) {
           border-radius: 20px;
           font-size: 11px;
           font-weight: 600;
-          color: #28a745;
-          border: 2px solid #28a745;
+          color: #10847e;
+          border: 2px solid #10847e;
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
@@ -267,7 +267,7 @@ function ProductCard({ product }: { product: PharmacyProduct }) {
           position: absolute;
           top: 15px;
           right: 15px;
-          background: #28a745;
+          background: #10847e;
           color: white;
           padding: 6px 12px;
           border-radius: 20px;
@@ -323,8 +323,9 @@ function ProductCard({ product }: { product: PharmacyProduct }) {
           position: absolute;
           top: 15px;
           left: 15px;
-          background: #e7f5ff;
-          color: #0c5ca8;
+          background: #EDF3F1;
+          color: #4E6F68;
+          border: 1px solid #D0DDD9;
           padding: 6px 12px;
           border-radius: 20px;
           font-size: 11px;
@@ -337,7 +338,7 @@ function ProductCard({ product }: { product: PharmacyProduct }) {
           border-radius: 8px;
           padding: 15px;
           margin-bottom: 15px;
-          border-right: 4px solid #28a745;
+          border-right: 4px solid #10847e;
         }
 
         .cannabinoid-grid {
@@ -361,7 +362,7 @@ function ProductCard({ product }: { product: PharmacyProduct }) {
         .cannabinoid-value {
           font-size: 24px;
           font-weight: 700;
-          color: #28a745;
+          color: #10847e;
         }
 
         .product-details {
@@ -437,12 +438,12 @@ function ProductCard({ product }: { product: PharmacyProduct }) {
         }
 
         .btn-primary {
-          background: #28a745;
+          background: #10847e;
           color: white;
         }
 
         .btn-primary:hover:not(:disabled) {
-          background: #218838;
+          background: #0a6b66;
           transform: translateY(-2px);
           box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
         }
@@ -454,8 +455,8 @@ function ProductCard({ product }: { product: PharmacyProduct }) {
 
         .btn-secondary {
           background: white;
-          color: #28a745;
-          border: 2px solid #28a745;
+          color: #10847e;
+          border: 2px solid #10847e;
         }
 
         .btn-secondary:hover {
@@ -501,8 +502,9 @@ function ProductCard({ product }: { product: PharmacyProduct }) {
           position: absolute;
           top: 10px;
           left: 15px;
-          background: #e7f5ff;
-          color: #0c5ca8;
+          background: #EDF3F1;
+          color: #4E6F68;
+          border: 1px solid #D0DDD9;
           padding: 6px 12px;
           border-radius: 20px;
           font-size: 11px;
@@ -520,7 +522,7 @@ function ProductCard({ product }: { product: PharmacyProduct }) {
         .section-title {
           font-size: 13px;
           font-weight: 700;
-          color: #28a745;
+          color: #10847e;
           margin-bottom: 12px;
           text-transform: uppercase;
           letter-spacing: 0.5px;
@@ -576,7 +578,7 @@ function ProductCard({ product }: { product: PharmacyProduct }) {
 
         .terpene-item > span:last-child {
           font-weight: 700;
-          color: #28a745;
+          color: #10847e;
           min-width: 40px;
           text-align: left;
         }
@@ -589,7 +591,7 @@ function ProductCard({ product }: { product: PharmacyProduct }) {
         }
 
         .bar-fill {
-          background: linear-gradient(90deg, #28a745, #20c997);
+          background: linear-gradient(90deg, #10847e, #3da89e);
           height: 100%;
           border-radius: 4px;
           transition: width 0.5s ease;
@@ -657,8 +659,8 @@ export default function PharmacyPage() {
         {/* Header */}
         <header className="flex items-center justify-between px-6 py-4 bg-white/95 backdrop-blur-sm border-b border-gray-200">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-green-600 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">Rx</span>
+            <div className="w-10 h-10 rounded-lg bg-[#10847e] flex items-center justify-center">
+              <span className="text-white font-bold text-sm">CP</span>
             </div>
             <div>
               <h1 className="text-lg font-bold text-gray-900">בית מסחר לתרופות</h1>
@@ -737,7 +739,7 @@ export default function PharmacyPage() {
         {!isAssistantOpen && (
           <button
             onClick={() => setIsAssistantOpen(true)}
-            className="fixed bottom-6 left-6 w-14 h-14 bg-green-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-green-700 transition-colors z-40"
+            className="fixed bottom-6 left-6 w-14 h-14 bg-[#10847e] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#0a6b66] transition-colors z-40"
             title="פתח עוזר רוקח"
           >
             <MessageCircle className="w-6 h-6" />

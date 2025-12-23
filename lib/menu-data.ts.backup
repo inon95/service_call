@@ -3,24 +3,18 @@ export interface MenuItem {
   image: string;
   category: string;
   title: {
-    he: string;
     en: string;
     zh: string;
     ja: string;
     ru: string;
   };
   description: {
-    he: string;
     en: string;
     zh: string;
     ja: string;
     ru: string;
   };
   price?: number;
-  // Weight-based pricing
-  packPrice?: number;      // Price per pack (e.g., 240)
-  packGrams?: number;      // Grams per pack (e.g., 10)
-  minOrderUnits?: number;  // Minimum order quantity in units (if different from 1)
   isSignature?: boolean;
   isSpicy?: boolean;
   isVegetarian?: boolean;
@@ -29,7 +23,6 @@ export interface MenuItem {
 export interface MenuCategory {
   id: string;
   name: {
-    he: string;
     en: string;
     zh: string;
     ja: string;
@@ -42,7 +35,6 @@ export const menuCategories: MenuCategory[] = [
   {
     id: 'signature',
     name: {
-      he: 'מנות השף',
       en: 'Chef\'s Signature',
       zh: '主厨推荐',
       ja: 'シェフおすすめ',
@@ -53,7 +45,6 @@ export const menuCategories: MenuCategory[] = [
   {
     id: 'sashimi',
     name: {
-      he: 'סשימי וסושי',
       en: 'Sashimi & Sushi',
       zh: '刺身与寿司',
       ja: '刺身・寿司',
@@ -64,7 +55,6 @@ export const menuCategories: MenuCategory[] = [
   {
     id: 'hokkaido',
     name: {
-      he: 'מיוחדים מהוקאידו',
       en: 'Hokkaido Specialties',
       zh: '北海道特产',
       ja: '北海道名物',
@@ -75,7 +65,6 @@ export const menuCategories: MenuCategory[] = [
   {
     id: 'wagyu',
     name: {
-      he: 'וואגיו וגריל',
       en: 'Wagyu & Grills',
       zh: '和牛烧烤',
       ja: '和牛・焼き物',
@@ -86,7 +75,6 @@ export const menuCategories: MenuCategory[] = [
   {
     id: 'nabe',
     name: {
-      he: 'סירי חמים',
       en: 'Hot Pots',
       zh: '火锅',
       ja: '鍋物',
@@ -97,7 +85,6 @@ export const menuCategories: MenuCategory[] = [
   {
     id: 'tempura',
     name: {
-      he: 'טמפורה',
       en: 'Tempura',
       zh: '天妇罗',
       ja: '天ぷら',
@@ -108,7 +95,6 @@ export const menuCategories: MenuCategory[] = [
   {
     id: 'rice-noodles',
     name: {
-      he: 'אורז ונודלס',
       en: 'Rice & Noodles',
       zh: '饭面',
       ja: 'ご飯・麺類',
@@ -119,7 +105,6 @@ export const menuCategories: MenuCategory[] = [
   {
     id: 'desserts',
     name: {
-      he: 'קינוחים',
       en: 'Desserts',
       zh: '甜品',
       ja: 'デザート',
@@ -136,22 +121,18 @@ export const menuItems: MenuItem[] = [
     image: '/menu/sichuan-boiled-wagyu-beef.jpg',
     category: 'signature',
     title: {
-      he: 'קייסקי אומקסה',
       en: 'Kaiseki Omakase',
       zh: '怀石料理套餐',
       ja: '懐石おまかせ',
       ru: 'Кайсеки Омакасе'
     },
     description: {
-      he: 'תפריט טעימות עונתי בן 7 מנות עם מיטב חומרי הגלם מהוקאידו, בהכנת השף הראשי',
       en: 'A 7-course seasonal tasting menu featuring the finest Hokkaido ingredients, crafted by our head chef',
       zh: '七道菜的时令品尝菜单，精选北海道最优质的食材，由我们的主厨精心烹制',
       ja: '北海道の最高級食材を使用した、料理長による7品のおまかせコース',
       ru: 'Дегустационное меню из 7 блюд с лучшими ингредиентами Хоккайдо'
     },
-    // Weight-based pricing example
-    packPrice: 240,
-    packGrams: 10,
+    price: 289,
     isSignature: true
   },
   {
@@ -159,23 +140,18 @@ export const menuItems: MenuItem[] = [
     image: '/menu/spicy-numbing-seafood-hotpot.jpg',
     category: 'signature',
     title: {
-      he: 'ארוחת סרטן שלג מהוקאידו',
       en: 'Hokkaido Snow Crab Course',
       zh: '北海道雪蟹套餐',
       ja: '北海道ズワイガニコース',
       ru: 'Курс из снежного краба Хоккайдо'
     },
     description: {
-      he: 'ארוחה מלאה של סרטן שלג פרימיום מהוקאידו: סשימי, צלוי, מאודה ומרק מיסו סרטנים',
       en: 'Full course featuring premium Hokkaido snow crab: sashimi, grilled, steamed, and crab miso soup',
       zh: '北海道优质雪蟹全套：刺身、烧烤、清蒸和蟹味噌汤',
       ja: '北海道産ズワイガニのフルコース：お刺身、焼き、蒸し、蟹味噌汁',
       ru: 'Полный курс премиального снежного краба: сашими, гриль, на пару, суп мисо'
     },
-    // Weight-based pricing with MOQ example
-    packPrice: 180,
-    packGrams: 5,
-    minOrderUnits: 2,
+    price: 275,
     isSignature: true
   },
   {
@@ -183,14 +159,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/soy-braised-beef.jpg',
     category: 'signature',
     title: {
-      he: 'טעימות וואגיו A5',
       en: 'A5 Wagyu Tasting',
       zh: 'A5和牛品鉴',
       ja: 'A5和牛テイスティング',
       ru: 'Дегустация A5 Вагю'
     },
     description: {
-      he: 'בקר וואגיו יפני A5 פרימיום מוגש בשלוש דרכים: צרוב, בסגנון סוקיאקי וכניגירי אלגנטי',
       en: 'Premium A5 Japanese wagyu served three ways: seared, sukiyaki-style, and as elegant nigiri',
       zh: 'A5级日本和牛三种烹饪方式：香煎、寿喜烧风格和精致握寿司',
       ja: 'A5和牛を3通りで：炙り、すき焼き風、握り寿司',
@@ -204,14 +178,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/pickled-cabbage-fish.jpg',
     category: 'signature',
     title: {
-      he: 'שלישיית קיפודי ים מהוקאידו',
       en: 'Hokkaido Uni Trio',
       zh: '北海道海胆三味',
       ja: '北海道うに三種盛り',
       ru: 'Трио морских ежей Хоккайдо'
     },
     description: {
-      he: 'קיפודי ים טריים משלושה אזורים בהוקאידו, כל אחד עם פרופיל טעם ייחודי',
       en: 'Fresh sea urchin from three Hokkaido regions, each with its unique flavor profile',
       zh: '来自北海道三个地区的新鲜海胆，每种都有独特的风味',
       ja: '北海道3産地のうにの食べ比べ、それぞれ異なる味わい',
@@ -227,14 +199,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/boiling-fish-in-spicy-broth.jpg',
     category: 'sashimi',
     title: {
-      he: 'סשימי טונה אוטורו',
       en: 'Otoro Tuna Sashimi',
       zh: '大腹金枪鱼刺身',
       ja: '大トロ刺身',
       ru: 'Сашими из Оторо тунца'
     },
     description: {
-      he: 'בטן טונה שומנית מובחרת, נבחרה ידנית משוק צוקיג\'י, מוגשת עם וואסאבי טרי',
       en: 'The finest fatty tuna belly, hand-selected from Tsukiji Market, served with fresh wasabi',
       zh: '最上等的金枪鱼腹部，筑地市场精选，配新鲜山葵',
       ja: '築地から厳選した最高級大トロ、本わさび添え',
@@ -247,14 +217,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/cold-chicken-in-chili-oil.jpg',
     category: 'sashimi',
     title: {
-      he: 'מגש סשימי מהוקאידו',
       en: 'Hokkaido Sashimi Platter',
       zh: '北海道刺身拼盘',
       ja: '北海道刺身盛り合わせ',
       ru: 'Ассорти сашими из Хоккайдо'
     },
     description: {
-      he: 'מבחר פרימיום של פירות ים מהוקאידו: סלמון, סקאלופ, שרימפס מתוק, קלמרי ודג עונתי',
       en: 'Premium assortment of Hokkaido seafood: salmon, scallop, sweet shrimp, squid, and seasonal catch',
       zh: '北海道优质海鲜拼盘：三文鱼、扇贝、甜虾、鱿鱼和时令鱼',
       ja: 'サーモン、ホタテ、甘エビ、イカ、季節の魚の盛り合わせ',
@@ -267,14 +235,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/fried-rice.jpg',
     category: 'sashimi',
     title: {
-      he: 'קערת איקורה',
       en: 'Ikura Salmon Roe Bowl',
       zh: '三文鱼籽盖饭',
       ja: 'いくら丼',
       ru: 'Икура Дон'
     },
     description: {
-      he: 'ביצי סלמון נוצצות מהוקאידו על אורז חם, מעדן אהוב מהוקאידו',
       en: 'Glistening Hokkaido salmon roe over warm rice, a beloved Hokkaido delicacy',
       zh: '晶莹的北海道三文鱼籽盖在温暖的米饭上，北海道经典美食',
       ja: 'きらきら輝く北海道産いくらをご飯に、北海道の名物',
@@ -287,14 +253,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/garlic-spare-ribs.jpg',
     category: 'sashimi',
     title: {
-      he: 'סושי אומקסה (12 יח\')',
       en: 'Sushi Omakase (12pc)',
       zh: '寿司套餐（12贯）',
       ja: '寿司おまかせ（12貫）',
       ru: 'Суши Омакасе (12 шт.)'
     },
     description: {
-      he: 'בחירת השף של 12 ניגירי סושי עם מיטב הדגים של היום',
       en: 'Chef\'s selection of 12 nigiri sushi featuring the day\'s finest catch',
       zh: '主厨精选12贯握寿司，呈现当日最新鲜的食材',
       ja: '料理長が厳選した本日の12貫握り寿司',
@@ -309,14 +273,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/braised-beef-brisket-with-potato.jpg',
     category: 'hokkaido',
     title: {
-      he: 'ג\'ינגיסוקאן כבש על הגריל',
       en: 'Jingisukan Lamb BBQ',
       zh: '成吉思汗烤羊肉',
       ja: 'ジンギスカン',
       ru: 'Дзингисукан баранина'
     },
     description: {
-      he: 'כבש צלוי איקוני מהוקאידו על גריל בצורת כיפה עם ירקות טריים',
       en: 'Hokkaido\'s iconic grilled lamb on a dome-shaped grill with fresh vegetables',
       zh: '北海道标志性的烤羊肉，圆顶烤架配新鲜蔬菜',
       ja: '北海道名物、ドーム型の鉄板で焼くラム肉と新鮮野菜',
@@ -329,14 +291,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/handmade-ice-jelly.jpg',
     category: 'hokkaido',
     title: {
-      he: 'מלון יובארי קינג',
       en: 'Yubari King Melon',
       zh: '夕张王甜瓜',
       ja: '夕張メロン',
       ru: 'Юбари Кинг Дыня'
     },
     description: {
-      he: 'מלון יובארי האגדי מהוקאידו, ידוע במתיקות המושלמת שלו',
       en: 'The legendary Yubari melon from Hokkaido, renowned for its perfect sweetness',
       zh: '传奇的北海道夕张甜瓜，以其完美的甜度闻名',
       ja: '北海道が誇る夕張メロン、完璧な甘さ',
@@ -350,14 +310,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/steamed-pork-with-rice-powder.jpg',
     category: 'hokkaido',
     title: {
-      he: 'סקאלופים צלויים מהוקאידו',
       en: 'Grilled Hokkaido Scallops',
       zh: '烤北海道扇贝',
       ja: '北海道産ホタテの炙り',
       ru: 'Гребешки Хоккайдо на гриле'
     },
     description: {
-      he: 'סקאלופים ענקיים מהוקאידו צלויים עם חמאה וסויה, מקורמלים לשלמות',
       en: 'Giant Hokkaido scallops grilled with butter and soy, caramelized to perfection',
       zh: '巨大的北海道扇贝用黄油和酱油烤制，焦糖化完美',
       ja: '北海道産の大きなホタテをバター醤油で香ばしく',
@@ -370,14 +328,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/free-range-chicken-soup.jpg',
     category: 'hokkaido',
     title: {
-      he: 'מרק קארי סאפורו',
       en: 'Sapporo Soup Curry',
       zh: '札幌汤咖喱',
       ja: '札幌スープカレー',
       ru: 'Саппоро Суп Карри'
     },
     description: {
-      he: 'מרק הקארי המפורסם של סאפורו עם עוף רך וירקות הוקאידו',
       en: 'Sapporo\'s famous soup curry with tender chicken and Hokkaido vegetables',
       zh: '札幌著名的汤咖喱配嫩鸡肉和北海道蔬菜',
       ja: '札幌名物スープカレー、柔らかチキンと北海道野菜',
@@ -393,14 +349,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/twice-cooked-pork.jpg',
     category: 'wagyu',
     title: {
-      he: 'סטייק סירלוין וואגיו A5',
       en: 'A5 Wagyu Sirloin Steak',
       zh: 'A5和牛西冷牛排',
       ja: 'A5和牛サーロインステーキ',
       ru: 'Стейк Сирлоин A5 Вагю'
     },
     description: {
-      he: 'סירלוין וואגיו A5 פרימיום צלוי על פחם יפני, מוגש עם תוספת עונתית',
       en: 'Premium A5 wagyu sirloin grilled over Japanese charcoal, served with seasonal garnish',
       zh: 'A5级和牛西冷用日本木炭烤制，配时令装饰',
       ja: 'A5和牛サーロインを備長炭で焼き上げ、季節の付け合わせと',
@@ -413,14 +367,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/kung-pao-chicken.jpg',
     category: 'wagyu',
     title: {
-      he: 'סט וואגיו יאקיניקו',
       en: 'Wagyu Yakiniku Set',
       zh: '和牛烧肉套餐',
       ja: '和牛焼肉セット',
       ru: 'Сет Вагю Якинику'
     },
     description: {
-      he: 'מבחר חתיכות וואגיו לגריל שולחני: ריבאיי, צלעות קצרות ולשון',
       en: 'Assorted wagyu cuts for tabletop grilling: ribeye, short rib, and tongue',
       zh: '各种和牛部位供桌上烧烤：肋眼、短肋和牛舌',
       ja: 'テーブルで焼く和牛セット：リブアイ、カルビ、タン',
@@ -433,14 +385,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/spicy-chicken-pot.jpg',
     category: 'wagyu',
     title: {
-      he: 'גריל פירות ים רובאטה',
       en: 'Robata Seafood Grill',
-      zh: '炉端海鲜烧烤',
+      zh: '�的场海鲜烧烤',
       ja: '海鮮炉端焼き',
       ru: 'Робата морепродукты'
     },
     description: {
-      he: 'פירות ים צלויים על פחם באופן מסורתי: סרטן מלך, לובסטר ושרימפסים ענקיים',
       en: 'Traditional charcoal-grilled seafood: king crab, lobster, and giant prawns',
       zh: '传统炭烤海鲜：帝王蟹、龙虾和大虾',
       ja: '炭火で焼く海鮮：タラバガニ、伊勢海老、大海老',
@@ -455,14 +405,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/mapo-tofu.jpg',
     category: 'nabe',
     title: {
-      he: 'שאבו שאבו וואגיו',
       en: 'Wagyu Shabu Shabu',
       zh: '和牛涮涮锅',
       ja: '和牛しゃぶしゃぶ',
       ru: 'Вагю Сябу-Сябу'
     },
     description: {
-      he: 'בקר וואגיו פרוס דק מטובל בציר קומבו דאשי עם ירקות עונתיים',
       en: 'Thinly sliced wagyu beef swished in kombu dashi with seasonal vegetables',
       zh: '薄切和牛在昆布高汤中涮煮，配时令蔬菜',
       ja: '薄切り和牛を昆布出汁でしゃぶしゃぶ、旬の野菜と',
@@ -475,14 +423,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/yu-xiang-shredded-pork.jpg',
     category: 'nabe',
     title: {
-      he: 'סוקיאקי פרימיום',
       en: 'Premium Sukiyaki',
       zh: '特选寿喜烧',
       ja: '特選すき焼き',
       ru: 'Премиум Сукияки'
     },
     description: {
-      he: 'בקר וואגיו מבושל בציר סויה מתוק עם טופו, ירקות וטבילה בביצה נא',
       en: 'Wagyu beef simmered in sweet soy broth with tofu, vegetables, and raw egg dip',
       zh: '和牛在甜酱油汤中炖煮，配豆腐、蔬菜和生鸡蛋蘸料',
       ja: '和牛を甘辛い割り下で、豆腐、野菜、溶き卵で',
@@ -495,14 +441,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/silky-pork-soup.jpg',
     category: 'nabe',
     title: {
-      he: 'סיר חם סרטנים מהוקאידו',
       en: 'Hokkaido Crab Hot Pot',
       zh: '北海道螃蟹火锅',
       ja: '北海道カニ鍋',
       ru: 'Краб Хоккайдо Набе'
     },
     description: {
-      he: 'סיר חם עשיר עם סרטן מלך מהוקאידו, ירקות וטופו בציר דאשי',
       en: 'Rich hot pot with Hokkaido king crab, vegetables, and tofu in dashi broth',
       zh: '浓郁火锅配北海道帝王蟹、蔬菜和豆腐，高汤底',
       ja: '北海道産タラバガニの鍋、野菜と豆腐を出汁で',
@@ -517,14 +461,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/crispy-corn-cake.jpg',
     category: 'tempura',
     title: {
-      he: 'טמפורה מוריאוואסה',
       en: 'Tempura Moriawase',
       zh: '天妇罗拼盘',
       ja: '天ぷら盛り合わせ',
       ru: 'Темпура Ассорти'
     },
     description: {
-      he: 'מבחר טמפורה: שרימפס נמר, ירקות עונתיים וקלמרי מהוקאידו',
       en: 'Assorted tempura: tiger prawn, seasonal vegetables, and Hokkaido squid',
       zh: '天妇罗拼盘：虎虾、时令蔬菜和北海道鱿鱼',
       ja: '天ぷら盛り合わせ：車海老、旬の野菜、北海道産イカ',
@@ -537,14 +479,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/hot-and-sour-potato-shreds.jpg',
     category: 'tempura',
     title: {
-      he: 'טמפורת שרימפס נמר',
       en: 'Tiger Prawn Tempura',
       zh: '虎虾天妇罗',
       ja: '車海老の天ぷら',
       ru: 'Темпура с тигровыми креветками'
     },
     description: {
-      he: 'חמישה שרימפסים גדולים בבלילה קלה ופריכה עם רוטב טנצויו לטבילה',
       en: 'Five large tiger prawns in light, crispy batter with tentsuyu dipping sauce',
       zh: '五只大虎虾裹上轻脆面糊，配天汁蘸酱',
       ja: '大きな車海老5尾をサクサクの衣で、天つゆと',
@@ -557,14 +497,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/stir-fried-seasonal-vegetables.jpg',
     category: 'tempura',
     title: {
-      he: 'טמפורת ירקות עונתית',
       en: 'Seasonal Vegetable Tempura',
       zh: '时令蔬菜天妇罗',
       ja: '季節野菜の天ぷら',
       ru: 'Овощная темпура'
     },
     description: {
-      he: 'טמפורה קלה ופריכה של ירקות עונתיים מהוקאידו',
       en: 'Light and crispy tempura of seasonal Hokkaido vegetables',
       zh: '北海道时令蔬菜的轻脆天妇罗',
       ja: '北海道の旬の野菜を軽くサクサクに',
@@ -580,14 +518,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/mouthwatering-chicken.jpg',
     category: 'rice-noodles',
     title: {
-      he: 'ראמן מיסו סאפורו',
       en: 'Sapporo Miso Ramen',
       zh: '札幌味噌拉面',
       ja: '札幌味噌ラーメン',
       ru: 'Саппоро Мисо Рамен'
     },
     description: {
-      he: 'ראמן מיסו עשיר מהוקאידו עם חזיר צ\'אשו, תירס וחמאה',
       en: 'Hokkaido\'s signature rich miso ramen with chashu pork, corn, and butter',
       zh: '北海道招牌浓郁味噌拉面配叉烧、玉米和黄油',
       ja: '北海道名物の濃厚味噌ラーメン、チャーシュー、コーン、バター',
@@ -600,14 +536,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/eggplant-with-chili-pepper.jpg',
     category: 'rice-noodles',
     title: {
-      he: 'אונאגי דון צלוי',
       en: 'Grilled Unagi Don',
       zh: '烤鳗鱼饭',
       ja: 'うな丼',
       ru: 'Унаги Дон'
     },
     description: {
-      he: 'צלופח מים מתוקים צלוי בזיגוג רוטב טארה מתוק על אורז תפוח',
       en: 'Grilled freshwater eel glazed with sweet tare sauce over fluffy rice',
       zh: '烤淡水鳗鱼淋上甜酱汁，盖在蓬松米饭上',
       ja: '香ばしく焼いた鰻を甘いタレで、ふっくらご飯の上に',
@@ -620,14 +554,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/spicy-diced-chicken.jpg',
     category: 'rice-noodles',
     title: {
-      he: 'צ\'יראשי דון',
       en: 'Chirashi Don',
       zh: '什锦刺身饭',
       ja: 'ちらし丼',
       ru: 'Чираши Дон'
     },
     description: {
-      he: 'מבחר סשימי על אורז סושי עם איקורה ותוספת עונתית',
       en: 'Assorted sashimi over sushi rice with ikura and seasonal garnish',
       zh: '各种刺身盖在寿司饭上，配三文鱼籽和时令装饰',
       ja: '色とりどりのお刺身を酢飯に、いくらと季節の薬味',
@@ -640,14 +572,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/smashed-cucumber-with-garlic.jpg',
     category: 'rice-noodles',
     title: {
-      he: 'זארו סובה',
       en: 'Zaru Soba',
-      zh: '冷荞麦面',
+      zh: '冷�的面',
       ja: 'ざるそば',
       ru: 'Зару Соба'
     },
     description: {
-      he: 'נודלס כוסמת קרים מוגשים על מחצלת במבוק עם רוטב לטבילה',
       en: 'Chilled buckwheat noodles served on a bamboo mat with dipping sauce',
       zh: '冷荞麦面放在竹席上，配蘸酱',
       ja: '竹ざるに盛った冷たいそば、つゆと薬味',
@@ -663,14 +593,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/tomato-scrambled-eggs.jpg',
     category: 'desserts',
     title: {
-      he: 'פרפה מאצ\'ה',
       en: 'Matcha Parfait',
       zh: '抹茶芭菲',
       ja: '抹茶パフェ',
       ru: 'Матча Парфе'
     },
     description: {
-      he: 'שכבות של גלידת מאצ\'ה, שעועית אדומה, מוצ\'י וקרם עם רוטב מאצ\'ה',
       en: 'Layers of matcha ice cream, red bean, mochi, and cream with matcha sauce',
       zh: '抹茶冰淇淋、红豆、麻糬和奶油层层叠加，淋上抹茶酱',
       ja: '抹茶アイス、あんこ、もち、クリームを重ねて、抹茶ソース',
@@ -684,14 +612,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/green-pepper-shredded-pork.jpg',
     category: 'desserts',
     title: {
-      he: 'גלידה רכה מחלב הוקאידו',
       en: 'Hokkaido Milk Soft Serve',
       zh: '北海道牛奶冰淇淋',
       ja: '北海道ミルクソフト',
       ru: 'Мягкое мороженое Хоккайдо'
     },
     description: {
-      he: 'גלידה רכה קרמית עשויה מחלב הוקאידו עשיר, שלמות טהורה ופשוטה',
       en: 'Creamy soft serve made with rich Hokkaido milk, pure and simple perfection',
       zh: '用浓郁的北海道牛奶制作的奶油冰淇淋，纯粹简单的完美',
       ja: '濃厚な北海道牛乳で作るクリーミーなソフトクリーム',
@@ -705,14 +631,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/braised-venison.jpg',
     category: 'desserts',
     title: {
-      he: 'שלישיית גלידת מוצ\'י',
       en: 'Mochi Ice Cream Trio',
       zh: '麻糬冰淇淋三味',
       ja: 'もちアイス三種',
       ru: 'Моти-мороженое Трио'
     },
     description: {
-      he: 'שלושה טעמי גלידה עטופים במוצ\'י רך: מאצ\'ה, תות ושומשום שחור',
       en: 'Three flavors of ice cream wrapped in soft mochi: matcha, strawberry, and black sesame',
       zh: '三种口味冰淇淋裹在软糯麻糬中：抹茶、草莓和黑芝麻',
       ja: '抹茶、いちご、黒ごまの三種のもちアイス',
@@ -726,14 +650,12 @@ export const menuItems: MenuItem[] = [
     image: '/menu/pickled-pepper-chicken-giblets.jpg',
     category: 'desserts',
     title: {
-      he: 'דוראיאקי',
       en: 'Dorayaki',
       zh: '铜锣烧',
       ja: 'どら焼き',
       ru: 'Дораяки'
     },
     description: {
-      he: 'כריך פנקייק יפני מסורתי ממולא במחית שעועית אדומה מתוקה',
       en: 'Traditional Japanese pancake sandwich filled with sweet red bean paste',
       zh: '传统日式铜锣烧，夹有甜红豆馅',
       ja: '伝統的などら焼き、ふっくらあんこ入り',
