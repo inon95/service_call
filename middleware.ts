@@ -85,23 +85,26 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Restaurant redirect logic - allow only specific paths
+  // Redirect logic - allow only specific paths
   const allowedPaths = [
     '/restaurant',
+    '/pharmacy',
     '/shop',
     '/api',
     '/_next',
     '/favicon.ico',
     '/vapi',
+    '/products',
+    '/attract_bg.png',
   ];
 
-  const isAllowed = allowedPaths.some(path => 
+  const isAllowed = allowedPaths.some(path =>
     pathname === path || pathname.startsWith(path + '/')
   );
 
-  // Redirect all non-allowed paths to restaurant
+  // Redirect all non-allowed paths to pharmacy
   if (!isAllowed) {
-    return NextResponse.redirect(new URL('/restaurant', request.url));
+    return NextResponse.redirect(new URL('/pharmacy', request.url));
   }
 
   return NextResponse.next();
