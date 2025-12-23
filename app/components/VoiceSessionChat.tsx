@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Phone, PhoneOff, Mic, Loader2, Trash2, Settings, UserPlus } from 'lucide-react';
+import { Send, Phone, PhoneOff, Mic, Loader2, Trash2, Settings, UserPlus, Volume2, VolumeX } from 'lucide-react';
 import Link from 'next/link';
 import Vapi from '@vapi-ai/web';
 import { useConversation } from '@elevenlabs/react';
@@ -22,7 +22,60 @@ const chefTanakaFirstMessages: Record<string, string> = {
   zh: "欢迎来到1898二世古餐厅！我是田中主厨，将为您介绍正宗的日本料理，采用北海道最优质的食材。今天您想吃什么？",
   ja: "ザ 1898 ニセコのレストランへようこそ！私は田中シェフです。北海道の最高級食材を使った本格日本料理をご案内いたします。本日は何をお召し上がりになりますか？",
   ru: "Добро пожаловать в ресторан The 1898 Niseko! Я шеф-повар Танака, ваш гид по аутентичной японской кухне с лучшими ингредиентами Хоккайдо. Что бы вы хотели сегодня?",
+  he: "שלום! אני כאן לעזור לך עם כל שאלה על מוצרי קנאביס רפואי. במה אוכל לסייע?",
 };
+
+// Pharmacy first message translations (gender-neutral)
+const pharmacyFirstMessages: Record<string, string> = {
+  en: "Hello! How can I help with medical cannabis products?",
+  he: "שלום! אפשר לעזור עם מוצרי קנאביס רפואי?",
+};
+
+// Pharmacy system prompt
+const pharmacySystemPrompt = `You are a Hebrew-speaking voice agent specializing in medical cannabis products.
+
+LANGUAGE RULES:
+- Use gender-neutral Hebrew only.
+- Never address the caller directly using gendered forms.
+- Avoid second-person pronouns entirely.
+- Do not use gendered past or future tense.
+- Prefer system-style and general phrasing.
+
+SPEECH STYLE:
+- Short sentences only (6–8 words max).
+- One idea per sentence.
+- Natural call-center Hebrew.
+- Calm, human, non-robotic pacing.
+
+ALLOWED EXAMPLES:
+- "אפשר לעזור?"
+- "מה מבוקש?"
+- "יש מוצר מתאים."
+- "בודק זמינות."
+- "יש אפשרות נוספת."
+
+FORBIDDEN:
+- אתה / את / לך / לך
+- תרצה / תרצי
+- מתאים לך
+- כל פנייה אישית ממוגדרת
+
+VOICE DELIVERY:
+- Slight pauses between sentences.
+- Avoid long medical terminology when possible.
+- Prefer spoken Hebrew over written Hebrew.
+
+YOUR ROLE:
+- Help understand different cannabis products (flowers, oils, etc.)
+- Explain THC/CBD content and effects
+- Provide information about strains (Indica, Sativa, Hybrid)
+- Answer questions about medical conditions and suitable products
+- Guide through the ordering process
+
+IMPORTANT:
+- Never provide specific medical advice - recommend consulting with a doctor
+- Be knowledgeable about the products available
+- Be patient and helpful with all questions`;
 
 // Language names for contextual updates
 const languageNames: Record<string, string> = {
@@ -30,6 +83,7 @@ const languageNames: Record<string, string> = {
   zh: 'Chinese (Mandarin)',
   ja: 'Japanese',
   ru: 'Russian',
+  he: 'Hebrew',
 };
 
 interface Message {
@@ -51,10 +105,12 @@ interface VoiceSessionChatProps {
   avatar?: string; // Avatar image path
   welcomeMessage?: string; // Welcome/intro message about the agent
   variant?: 'light' | 'dark'; // Visual variant: light (default) or dark (glass-morphism)
-  language?: 'en' | 'zh' | 'ja' | 'ru'; // Language for the agent to speak in
+  language?: 'en' | 'zh' | 'ja' | 'ru' | 'he'; // Language for the agent to speak in
+  autoStart?: boolean; // Auto-start the call when component mounts
+  speakerEnabled?: boolean; // External control for speaker/voice mode
 }
 
-export default function VoiceSessionChat({ agentId, sessionId = 'default', elevenLabsAgentId, contextData, title, subtitle, suggestions, avatar, welcomeMessage, variant = 'light', language = 'en' }: VoiceSessionChatProps) {
+export default function VoiceSessionChat({ agentId, sessionId = 'default', elevenLabsAgentId, contextData, title, subtitle, suggestions, avatar, welcomeMessage, variant = 'light', language = 'en', autoStart = false, speakerEnabled = true }: VoiceSessionChatProps) {
   const isDark = variant === 'dark';
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -63,8 +119,12 @@ export default function VoiceSessionChat({ agentId, sessionId = 'default', eleve
   const [vapi, setVapi] = useState<Vapi | null>(null);
   const [isCallActive, setIsCallActive] = useState(false);
   const [isVapiLoading, setIsVapiLoading] = useState(false);
+  // Use external speakerEnabled prop
+  const speakerOn = speakerEnabled;
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const contextDataRef = useRef<Record<string, unknown> | undefined>(contextData);
+  const noResponseCountRef = useRef<number>(0); // Track consecutive assistant messages without user response
+  const isFirstRenderRef = useRef<boolean>(true); // Track first render to prevent immediate startCall
 
   // Keep ref updated with latest contextData
   useEffect(() => {
@@ -474,13 +534,44 @@ export default function VoiceSessionChat({ agentId, sessionId = 'default', eleve
       console.log('✅ ElevenLabs connected with client tools');
     },
     onDisconnect: () => {
+      console.log('⚠️ ElevenLabs disconnected');
       setIsCallActive(false);
       setIsVapiLoading(false);
     },
     onMessage: (message) => {
+      const role = message.source === 'user' ? 'user' : 'assistant';
+
+      // Track consecutive assistant messages without user response
+      if (role === 'user') {
+        // User responded - reset counter
+        noResponseCountRef.current = 0;
+      } else if (role === 'assistant') {
+        // Check if this is a "no input" message - end call immediately
+        const noInputPhrases = ['לא שומע', 'אני עדיין כאן', 'לא מצליח לשמוע'];
+        const isNoInputMessage = noInputPhrases.some(phrase => message.message.includes(phrase));
+
+        if (isNoInputMessage) {
+          noResponseCountRef.current += 2; // Count "no input" messages as 2
+          console.log(`📊 No input detected - count: ${noResponseCountRef.current}/3`);
+        } else {
+          noResponseCountRef.current += 1;
+          console.log(`📊 No response count: ${noResponseCountRef.current}/3`);
+        }
+
+        // End call after 3 attempts without user response (or faster for no-input messages)
+        if (noResponseCountRef.current >= 3) {
+          console.log('⏹️ Ending call - no user response');
+          noResponseCountRef.current = 0; // Reset immediately to prevent multiple calls
+          setTimeout(() => {
+            if (elevenLabsConversation.status === 'connected') {
+              elevenLabsConversation.endSession();
+            }
+          }, 1000);
+        }
+      }
+
       setMessages(prev => {
         const lastMsg = prev[prev.length - 1];
-        const role = message.source === 'user' ? 'user' : 'assistant';
 
         // Update last message if same role and within 2 seconds
         if (lastMsg && lastMsg.role === role && Date.now() - lastMsg.timestamp < 2000) {
@@ -490,8 +581,10 @@ export default function VoiceSessionChat({ agentId, sessionId = 'default', eleve
       });
     },
     onError: (error) => {
-      console.error('ElevenLabs error:', error);
+      console.error('❌ ElevenLabs error:', error);
+      console.error('Error details:', JSON.stringify(error, null, 2));
       setIsVapiLoading(false);
+      setIsCallActive(false);
     },
   });
 
@@ -502,6 +595,135 @@ export default function VoiceSessionChat({ agentId, sessionId = 'default', eleve
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Auto-start call when autoStart prop is true (with 30 second delay)
+  useEffect(() => {
+    let callTimer: NodeJS.Timeout | null = null;
+    let ringStartTimer: NodeJS.Timeout | null = null;
+    let ringStopTimer: NodeJS.Timeout | null = null;
+    let ringInterval: NodeJS.Timeout | null = null;
+    let ringAudio: HTMLAudioElement | null = null;
+
+    const playRingWithFadeIn = () => {
+      // Use Web Audio API to create a phone-like ring tone
+      try {
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const now = audioContext.currentTime;
+
+        // Create two oscillators for a classic phone ring (dual-tone)
+        const osc1 = audioContext.createOscillator();
+        const osc2 = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        osc1.connect(gainNode);
+        osc2.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        // Phone ring frequencies (similar to standard phone ring)
+        osc1.frequency.value = 440; // A4
+        osc2.frequency.value = 480; // B4
+        osc1.type = 'sine';
+        osc2.type = 'sine';
+
+        // Ring pattern: on-off-on-off
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(0.15, now + 0.05);
+        gainNode.gain.setValueAtTime(0.15, now + 0.4);
+        gainNode.gain.linearRampToValueAtTime(0, now + 0.45);
+        gainNode.gain.setValueAtTime(0, now + 0.6);
+        gainNode.gain.linearRampToValueAtTime(0.15, now + 0.65);
+        gainNode.gain.setValueAtTime(0.15, now + 1.0);
+        gainNode.gain.linearRampToValueAtTime(0, now + 1.05);
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 1.1);
+        osc2.stop(now + 1.1);
+
+        setTimeout(() => audioContext.close(), 1200);
+        console.log('🔔 Ring tone playing');
+      } catch (err) {
+        console.log('❌ Ring sound failed:', err);
+      }
+    };
+
+    if (autoStart && speakerOn && !isCallActive && !isVapiLoading) {
+      // Start ringing at 3 seconds
+      ringStartTimer = setTimeout(() => {
+        // Play first ring
+        playRingWithFadeIn();
+
+        // Play subsequent rings every 4 seconds (3 more rings = 4 total)
+        let ringCount = 1;
+        ringInterval = setInterval(() => {
+          ringCount++;
+          playRingWithFadeIn();
+          // Stop after 4 rings
+          if (ringCount >= 4 && ringInterval) {
+            clearInterval(ringInterval);
+          }
+        }, 4000);
+      }, 3000);
+
+      // Stop ringing at 18 seconds (backup cleanup)
+      ringStopTimer = setTimeout(() => {
+        if (ringInterval) clearInterval(ringInterval);
+        if (ringAudio) {
+          ringAudio.pause();
+          ringAudio.currentTime = 0;
+        }
+      }, 18000);
+
+      // Start call at 20 seconds (after 4 rings)
+      callTimer = setTimeout(() => {
+        startCall();
+      }, 20000);
+    }
+
+    return () => {
+      if (callTimer) clearTimeout(callTimer);
+      if (ringStartTimer) clearTimeout(ringStartTimer);
+      if (ringStopTimer) clearTimeout(ringStopTimer);
+      if (ringInterval) clearInterval(ringInterval);
+      if (ringAudio) {
+        ringAudio.pause();
+        ringAudio.currentTime = 0;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoStart, speakerOn]);
+
+  // Handle speaker toggle - end call when off, start immediately when on
+  useEffect(() => {
+    // Skip first render - let the auto-start timer handle initial connection
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false;
+      return;
+    }
+
+    if (!speakerOn && isCallActive) {
+      // Speaker turned off - end the call
+      if (provider === 'elevenlabs' && elevenLabsConversation.status === 'connected') {
+        elevenLabsConversation.endSession();
+      } else if (vapi) {
+        vapi.stop();
+      }
+    } else if (speakerOn && !isCallActive && !isVapiLoading && autoStart) {
+      // Speaker turned on - start call immediately
+      startCall();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [speakerOn]);
+
+  // Cleanup: end call when component unmounts
+  useEffect(() => {
+    return () => {
+      if (provider === 'elevenlabs' && elevenLabsConversation.status === 'connected') {
+        elevenLabsConversation.endSession();
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Listen for external messages (from quick actions, etc.)
   useEffect(() => {
@@ -675,15 +897,27 @@ export default function VoiceSessionChat({ agentId, sessionId = 'default', eleve
       } else if (provider === 'elevenlabs') {
         console.log('🌐 Starting ElevenLabs session with language:', language);
         const agentIdToUse = elevenLabsAgentId || process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID || '';
+
+        if (!agentIdToUse) {
+          console.error('No ElevenLabs agent ID configured');
+          setIsVapiLoading(false);
+          return;
+        }
         const isDefaultAgent = !elevenLabsAgentId;
         const isBoutiqueAgent = elevenLabsAgentId === process.env.NEXT_PUBLIC_ELEVENLABS_BOUTIQUE_AGENT_ID;
+        const isPharmacyAgent = agentId === 'pharmacy-concierge';
 
-        // Build agent overrides with language and optional firstMessage
-        const agentOverrides: { language: string; firstMessage?: string } = {
-          language: language,
-        };
+        // Build agent overrides - DON'T include language in agent overrides
+        // Language should be handled via voice settings on the ElevenLabs dashboard
+        const agentOverrides: { firstMessage?: string; prompt?: string } = {};
 
-        if (isDefaultAgent) {
+        if (isPharmacyAgent) {
+          // Pharmacy agent: use pharmacy-specific first message
+          // Note: System prompt should be configured on ElevenLabs dashboard, not via API override
+          const firstMessage = pharmacyFirstMessages[language] || pharmacyFirstMessages.he;
+          agentOverrides.firstMessage = firstMessage;
+          console.log('📝 First message override (Pharmacy):', firstMessage.substring(0, 50) + '...');
+        } else if (isDefaultAgent) {
           // Default agent (Yuki): use hardcoded translations for non-English
           if (language !== 'en') {
             const firstMessage = firstMessageTranslations[language] || firstMessageTranslations.en;
@@ -701,24 +935,65 @@ export default function VoiceSessionChat({ agentId, sessionId = 'default', eleve
           console.log('📝 First message override (custom):', welcomeMessage.substring(0, 50) + '...');
         }
 
-        await elevenLabsConversation.startSession({
+        console.log('🚀 Calling startSession with agentId:', agentIdToUse);
+        console.log('🚀 Agent overrides:', JSON.stringify(agentOverrides, null, 2));
+
+        // Build session config with voice override for pharmacy agent
+        const sessionConfig: {
+          agentId: string;
+          overrides?: {
+            agent?: { firstMessage?: string; prompt?: string };
+            tts?: { voiceId?: string };
+          };
+        } = {
           agentId: agentIdToUse,
-          overrides: {
-            agent: agentOverrides
+        };
+
+        if (Object.keys(agentOverrides).length > 0 || isPharmacyAgent) {
+          sessionConfig.overrides = {};
+          if (Object.keys(agentOverrides).length > 0) {
+            sessionConfig.overrides.agent = agentOverrides;
           }
-        });
+          if (isPharmacyAgent) {
+            // Use "Daniel" - a calm, professional male voice good for reassuring tone
+            // Alternative voice IDs: "onwK4e9ZLuTAKqWW03F9" (Daniel), "pNInz6obpgDQGcFmaJgB" (Adam)
+            sessionConfig.overrides.tts = {
+              voiceId: "onwK4e9ZLuTAKqWW03F9" // Daniel - soft, reassuring male voice
+            };
+            console.log('🎙️ Using male voice override: Daniel');
+          }
+        }
+
+        try {
+          await elevenLabsConversation.startSession(sessionConfig);
+          console.log('✅ startSession completed successfully');
+        } catch (sessionError) {
+          console.error('❌ startSession failed:', sessionError);
+          console.error('❌ Error type:', typeof sessionError);
+          console.error('❌ Error details:', JSON.stringify(sessionError, null, 2));
+          setIsVapiLoading(false);
+          return;
+        }
 
         // Send language instruction as contextual update to ensure responses are in the correct language
         if (language !== 'en') {
           setTimeout(() => {
-            const languageName = languageNames[language] || 'English';
-            const languageContext = `[LANGUAGE INSTRUCTION]
+            try {
+              const languageName = languageNames[language] || 'English';
+              const languageContext = `[LANGUAGE INSTRUCTION]
 IMPORTANT: The guest has selected ${languageName} as their preferred language.
 You MUST respond in ${languageName} for ALL your responses throughout this conversation.
 Do not switch to English unless the guest explicitly asks.`;
-            console.log('🌐 Sending language context:', languageName);
-            elevenLabsConversation.sendContextualUpdate(languageContext);
-          }, 300);
+              console.log('🌐 Sending language context:', languageName);
+              if (elevenLabsConversation.status === 'connected') {
+                elevenLabsConversation.sendContextualUpdate(languageContext);
+              } else {
+                console.log('⚠️ Skipping language context - not connected');
+              }
+            } catch (e) {
+              console.log('⚠️ Could not send language context:', e);
+            }
+          }, 500);
         }
 
         // If contextData has documentContent, send it as a contextual update after connection
@@ -735,6 +1010,27 @@ Use this document content to answer the user's questions.`;
             console.log('📚 Sending document context via contextual update');
             elevenLabsConversation.sendContextualUpdate(contextUpdate);
           }, 500);
+        }
+
+        // Send previous chat history as context when reconnecting
+        if (messages.length > 0) {
+          setTimeout(() => {
+            try {
+              const chatHistory = messages.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n');
+              const historyContext = `[PREVIOUS CONVERSATION HISTORY]
+The following is the conversation that happened before you reconnected. Continue from where we left off:
+
+${chatHistory}
+
+Please acknowledge you remember our conversation and continue helping the user.`;
+              console.log('💬 Sending chat history context');
+              if (elevenLabsConversation.status === 'connected') {
+                elevenLabsConversation.sendContextualUpdate(historyContext);
+              }
+            } catch (e) {
+              console.log('⚠️ Could not send chat history:', e);
+            }
+          }, 800);
         }
 
         // If contextData has taskData, send it as a contextual update for task management
@@ -802,9 +1098,11 @@ Use this data to answer questions about guests. When asked about a specific gues
   const endCall = async () => {
     if (provider === 'vapi' && vapi) {
       vapi.stop();
-    } else if (provider === 'elevenlabs') {
+    } else if (provider === 'elevenlabs' && elevenLabsConversation.status === 'connected') {
       elevenLabsConversation.endSession();
     }
+    // Clear messages when call ends
+    setMessages([]);
   };
 
   const addPhoneToCall = async () => {
@@ -944,8 +1242,8 @@ Use this data to answer questions about guests. When asked about a specific gues
   };
 
   return (
-    <div className={`h-full flex flex-col overflow-hidden ${
-      isDark ? 'bg-transparent' : 'bg-white rounded-2xl shadow-sm'
+    <div className={`h-full flex flex-col overflow-hidden relative ${
+      isDark ? 'bg-transparent' : 'bg-transparent'
     }`}>
       {/* Header - Always visible */}
       <div className={`px-5 py-4 flex-shrink-0 ${isDark ? 'border-b border-white/10' : 'border-b border-stone-100'}`}>
@@ -992,26 +1290,29 @@ Use this data to answer questions about guests. When asked about a specific gues
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0">
+      <div className="flex-1 overflow-y-auto p-4 pb-16 space-y-3 min-h-0">
         {messages.length === 0 && !isCallActive && (
           <div className="flex flex-col items-center justify-center h-full text-center px-4">
             {/* Welcome Message */}
             <p className={`text-sm leading-relaxed max-w-[280px] ${isDark ? 'text-white/70' : 'text-stone-600'}`}>
-              {welcomeMessage || 'I\'m here to help. Tap below to start a conversation.'}
+              {welcomeMessage?.includes('נא להמתין') ? (
+                <span className="animate-pulse font-bold text-lg">{welcomeMessage}</span>
+              ) : (welcomeMessage || 'I\'m here to help. Tap below to start a conversation.')}
             </p>
 
             {/* Suggestions */}
             {suggestions && suggestions.length > 0 && (
-              <div className="mt-6 w-full">
-                <p className={`text-[10px] uppercase tracking-wider mb-3 ${isDark ? 'text-white/40' : 'text-stone-400'}`}>Try saying</p>
+              <div className="mt-2 w-full">
+                <p className={`text-sm font-medium tracking-wider mb-3 ${isDark ? 'text-white/40' : 'text-stone-500'}`}>שאלות נפוצות</p>
                 <div className="space-y-2">
                   {suggestions.map((suggestion, idx) => (
                     <div
                       key={idx}
-                      className={`px-4 py-2.5 text-sm rounded-xl text-left ${
+                      onClick={() => setInput(suggestion)}
+                      className={`px-4 py-2.5 text-sm rounded-xl text-left cursor-pointer transition-colors ${
                         isDark
-                          ? 'text-white/70 bg-white/5 border border-white/10'
-                          : 'text-stone-600 bg-stone-50'
+                          ? 'text-white/70 bg-white/5 border border-white/10 hover:bg-white/10'
+                          : 'text-stone-600 bg-white/70 hover:bg-white/90 backdrop-blur-sm'
                       }`}
                     >
                       "{suggestion}"
@@ -1025,10 +1326,10 @@ Use this data to answer questions about guests. When asked about a specific gues
 
         {messages.length === 0 && isCallActive && (
           <div className="text-center py-8">
-            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${
+            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium backdrop-blur-sm ${
               isDark
                 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                : 'bg-green-50 text-green-700'
+                : 'bg-green-50/80 text-green-700'
             }`}>
               <Mic className="w-3.5 h-3.5 animate-pulse" />
               <span>Listening...</span>
@@ -1039,23 +1340,17 @@ Use this data to answer questions about guests. When asked about a specific gues
         {messages.map((msg, idx) => (
           <div
             key={idx}
-            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            className={`flex ${msg.role === 'user' ? 'justify-start' : 'justify-end'}`}
           >
             <div
-              className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
+              className={`max-w-[85%] rounded-lg px-3 py-2 backdrop-blur-sm ${
                 msg.role === 'user'
-                  ? isDark
-                    ? 'bg-amber-500/20 text-white border border-amber-500/30'
-                    : 'bg-stone-800 text-white'
-                  : isDark
-                    ? 'bg-white/10 text-white border border-white/10'
-                    : 'bg-white text-stone-800 shadow-sm'
+                  ? 'bg-[#dcf8c6]/90 text-gray-800 rounded-bl-none'
+                  : 'bg-white/90 text-gray-800 rounded-br-none shadow-sm'
               }`}
             >
               <p className="text-sm leading-relaxed">{msg.content}</p>
-              <p className={`text-xs mt-1 ${
-                isDark ? 'text-white/40' : 'text-stone-400'
-              }`}>
+              <p className="text-[10px] mt-1 text-gray-500 text-right">
                 {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </p>
             </div>
@@ -1065,65 +1360,17 @@ Use this data to answer questions about guests. When asked about a specific gues
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Bottom Controls */}
-      <div className={`p-4 flex-shrink-0 ${isDark ? 'border-t border-white/10' : 'border-t border-stone-100'}`}>
-        {!isCallActive ? (
-          /* Speak Button - Initial State */
-          <button
-            id="voice-call-button"
-            onClick={startCall}
-            disabled={isVapiLoading}
-            className={`w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium rounded-xl transition-all disabled:opacity-50 ${
-              isDark
-                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-white hover:from-amber-400 hover:to-amber-500 shadow-lg'
-                : 'bg-stone-800 text-white hover:bg-stone-700 rounded-full'
-            }`}
-          >
-            {isVapiLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <>
-                <Phone className="w-4 h-4" />
-                <span>Speak with Concierge</span>
-              </>
-            )}
-          </button>
-        ) : (
-          /* Chat Active - Input with Send and End buttons */
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Type your message..."
-              disabled={isLoading}
-              className={`flex-1 px-4 py-2 rounded-full text-sm focus:outline-none disabled:opacity-50 ${
-                isDark
-                  ? 'bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:ring-2 focus:ring-amber-400/50'
-                  : 'bg-white border border-stone-200 text-stone-800 placeholder:text-stone-400 focus:ring-2 focus:ring-stone-300'
-              }`}
-            />
-            <button
-              onClick={sendMessage}
-              disabled={isLoading || !input.trim()}
-              className={`p-2 disabled:opacity-30 transition-colors ${
-                isDark ? 'text-white/60 hover:text-white' : 'text-stone-600 hover:text-stone-800'
-              }`}
-              aria-label="Send message"
-            >
-              <Send className="w-4 h-4" />
-            </button>
-            <button
-              id="voice-call-button"
-              onClick={endCall}
-              className="p-2 text-red-400 hover:text-red-300 transition-colors"
-              aria-label="End call"
-            >
-              <PhoneOff className="w-4 h-4" />
-            </button>
-          </div>
-        )}
+      {/* Chat Input - Fixed to bottom */}
+      <div className="absolute bottom-[5px] left-3 right-3 bg-white/90 backdrop-blur-sm rounded-xl shadow-sm">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyPress={handleKeyPress}
+          placeholder="הקלד הודעה..."
+          className="w-full px-4 py-3 text-sm rounded-xl focus:outline-none text-right bg-transparent"
+          dir="rtl"
+        />
       </div>
 
       {/* Voice Action Modal */}

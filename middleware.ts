@@ -96,6 +96,8 @@ export async function middleware(request: NextRequest) {
     '/vapi',
     '/products',
     '/attract_bg.png',
+    '/privacy',
+    '/terms',
   ];
 
   const isAllowed = allowedPaths.some(path =>
